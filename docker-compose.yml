@@ -1,0 +1,35 @@
+version: '3'
+services:
+  db:
+    image: mysql:latest
+    restart: always
+    container_name: mysql-db2
+    environment:
+      MYSQL_DATABASE: phone-book
+      MYSQL_USER: user
+      MYSQL_PASSWORD: secret
+      MYSQL_ROOT_PASSWORD: secret
+    ports:
+      - "3306:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+
+  phonebook_service: #it is just a name, which will be used only in this file.
+    image: phone-book-service               #name of the image after dockerfile executes
+    container_name: phone-book-app  #name of the container created from docker image
+    build:
+      context: .                          #docker file path (. means root directory)
+      dockerfile: Dockerfile              #docker file name
+    ports:
+      - "9090:9090"                       #docker containter port with your os port
+    restart: always
+
+    depends_on: #define dependencies of this app
+      - db                                #dependency name (which is defined with this name 'db' in this file earlier)
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db2:3306/phone-book?createDatabaseIfNotExist=true
+      SPRING_DATASOURCE_USERNAME: user
+      SPRING_DATASOURCE_PASSWORD: secret
+volumes:
+  db-data:
+
